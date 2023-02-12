@@ -23,19 +23,27 @@ namespace Player_Test
         Rectangle player1 = new Rectangle(10, 170, 27, 27);
 
         int playerSpeed = 4;
+        int playerSize;
 
         private bool wDown;
         private bool aDown;
         private bool sDown;
         private bool dDown;
 
+        int playerStartX;
+        int playerStartY;
+        bool taken;
 
         public Form1()
         {
             InitializeComponent();
         }
-
-        private void createLevel(int[] level, int rectangleDimension)
+        private void movePlayerTo(int x, int y)
+        {
+            player1.X = x;
+            player1.Y = y;
+        }
+        private void createLevel(int[] level, int rectangleDimension, int spawnX, int spawnY)
         {
             tiles.Clear();
             tilePallette.Clear();
@@ -47,7 +55,7 @@ namespace Player_Test
                 {
                     x -= level[0];
                 }
-                tiles.Add(new Rectangle((x-1) * rectangleDimension, (y-1) * rectangleDimension, rectangleDimension, rectangleDimension));
+                tiles.Add(new Rectangle((x - 1) * rectangleDimension, (y - 1) * rectangleDimension, rectangleDimension, rectangleDimension));
                 tilePallette.Add(level[n]);
                 if ((n) % (level[0]) == 0)
                 {
@@ -56,6 +64,12 @@ namespace Player_Test
                 }
 
             }
+            playerStartY = (spawnY);
+            playerStartX = (spawnX);
+            movePlayerTo(playerStartX, playerStartY);
+            playerSize = player1.Width;
+
+
         }
 
 
@@ -76,14 +90,52 @@ namespace Player_Test
 
             if (aDown == true && player1.X > 0 + playerSpeed)
             {
-                 player1.X -= playerSpeed;
+                player1.X -= playerSpeed;
             }
             if (dDown == true && player1.X < Size.Width - playerSpeed - player1.Width)
             {
-                 player1.X += playerSpeed;
+                player1.X += playerSpeed;
             }
-            //refresh and do the paint function
-            Refresh();
+            //player interacts with tiles
+            for (int n = 0; n < tiles.Count; n++)
+            {
+                if (player1.IntersectsWith(tiles[n]) && (tilePallette[n] == 7))
+                {
+                    movePlayerTo(playerStartX, playerStartY); 
+                }
+                if (player1.IntersectsWith(tiles[n]) && (tilePallette[n] == 4))
+                {
+                    //UP AND DOWN
+                    if ((player1.Bottom > tiles[n].Top) && (player1.Top > tiles[n].Top) && (wDown == true) && (taken == false)) //Player entering from BELOW
+                    {
+                        player1.Y = tiles[n].Bottom;
+                        taken = false;
+                    }
+                    else if ((player1.Top < tiles[n].Bottom) && (player1.Bottom < tiles[n].Bottom) && (sDown == true) && (taken == false)) //Player entering from ABOVE
+                    {
+                        player1.Y = tiles[n].Top - playerSize;
+                        taken = false;
+                    }
+                    //LEFT AND RIGHT
+                    else if ((player1.Left < tiles[n].Left) && (dDown == true)) //Player entering from LEFT
+                    {
+                        player1.X = tiles[n].Left - playerSize;
+                        taken = true;
+                    }
+                    else if ((player1.Right > tiles[n].Right) && (aDown == true)) //Player entering from RIGHT
+                    {
+                        player1.X = tiles[n].Right;
+                        taken = true;
+                    }
+                    else 
+                    { 
+                        taken = false; 
+                    }
+                }
+
+            }
+        //refresh and do the paint function
+        Refresh();
         }
 
         private void Form1_Paint(object sender, PaintEventArgs e)
@@ -91,10 +143,9 @@ namespace Player_Test
             
                 for (int n = 0; n < tiles.Count; n++)
                 {
-                    if (tilePallette[n] == 4)
-                    {
-                        e.Graphics.FillRectangle(brush0, tiles[n]);
-                    }
+                if (tilePallette[n] == 4) { 
+                    e.Graphics.FillRectangle(brush0, tiles[n]);              
+                }
                     if (tilePallette[n] == 7)
                     {
                         e.Graphics.FillRectangle(brush2, tiles[n]);
@@ -179,21 +230,21 @@ namespace Player_Test
             int[] level3 =
            {
                 28,
-                1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,1,4,4,
-                1,7,1,1,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,1,4,4,
+                1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,4,4,4,1,4,4,
+                1,7,1,1,7,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,4,4,4,1,4,4,
                 1,7,1,1,7,1,1,7,7,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,
-                1,7,7,7,7,1,1,7,7,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,
-                1,7,1,1,7,1,7,1,1,1,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,
-                1,7,1,1,7,1,7,1,1,1,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,
-                1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,
-                1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,
+                1,7,7,7,7,1,1,7,7,7,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,
+                1,7,1,1,7,1,7,1,1,1,7,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,
+                1,7,1,1,7,1,7,1,1,1,7,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,
+                1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,4,4,
+                1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,4,4,
                 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
-                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,
+                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,
             };
             //createLevel(level1, Size.Width / level1[0]);
             //createLevel(level2, Size.Width / level2[0]);
-            createLevel(level3, Size.Width / level3[0]);
+            createLevel(level3, Size.Width / level3[0], Size.Width/2,Size.Height/2);
         }
     }
 }
