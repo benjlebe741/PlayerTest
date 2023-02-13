@@ -32,6 +32,8 @@
             this.playerTimer = new System.Windows.Forms.Timer(this.components);
             this.label1 = new System.Windows.Forms.Label();
             this.playLabel = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.pastPlayerTimer = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // playerTimer
@@ -62,12 +64,28 @@
             this.playLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.playLabel.Click += new System.EventHandler(this.playLabel_Click);
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.label2.Location = new System.Drawing.Point(122, 18);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(44, 16);
+            this.label2.TabIndex = 2;
+            this.label2.Text = "label2";
+            // 
+            // pastPlayerTimer
+            // 
+            this.pastPlayerTimer.Enabled = true;
+            this.pastPlayerTimer.Tick += new System.EventHandler(this.pastPlayerTimer_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.ClientSize = new System.Drawing.Size(1920, 1080);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.playLabel);
             this.Controls.Add(this.label1);
             this.DoubleBuffered = true;
@@ -75,6 +93,7 @@
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form1_Paint);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown_1);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyUp_1);
@@ -88,6 +107,8 @@
         private System.Windows.Forms.Timer playerTimer;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label playLabel;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Timer pastPlayerTimer;
     }
 }
 

@@ -32,7 +32,11 @@ namespace Player_Test
 
         int playerStartX;
         int playerStartY;
+
+        int pastPlayerY; 
+
         bool taken;
+
 
         public Form1()
         {
@@ -105,15 +109,19 @@ namespace Player_Test
                 }
                 if (player1.IntersectsWith(tiles[n]) && (tilePallette[n] == 4))
                 {
-                    //UP AND DOWN
-                    if ((player1.Bottom > tiles[n].Top) && (player1.Top > tiles[n].Top) && (wDown == true) && (taken == false)) //Player entering from BELOW
+                    if (((pastPlayerY) - (player1.Y)) <= 4) 
                     {
-                        player1.Y = tiles[n].Bottom;
-                        taken = false;
+                      //  taken = false;
                     }
-                    else if ((player1.Top < tiles[n].Bottom) && (player1.Bottom < tiles[n].Bottom) && (sDown == true) && (taken == false)) //Player entering from ABOVE
+                    //UP AND DOWN
+                    if ((player1.Top < tiles[n].Bottom) && (player1.Bottom < tiles[n].Bottom) && (sDown == true) && (taken == false)) //Player entering from ABOVE
                     {
                         player1.Y = tiles[n].Top - playerSize;
+                        taken = false;
+                    }
+                    else if ((player1.Top > tiles[n].Top) && (player1.Bottom > tiles[n].Top) && (wDown == true) && (taken == false)) //Player entering from BELOW
+                    {
+                        player1.Y = tiles[n].Bottom;
                         taken = false;
                     }
                     //LEFT AND RIGHT
@@ -121,7 +129,7 @@ namespace Player_Test
                     {
                         player1.X = tiles[n].Left - playerSize;
                         taken = true;
-                    }
+                      }
                     else if ((player1.Right > tiles[n].Right) && (aDown == true)) //Player entering from RIGHT
                     {
                         player1.X = tiles[n].Right;
@@ -231,7 +239,7 @@ namespace Player_Test
            {
                 28,
                 1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,4,4,4,1,4,4,
-                1,7,1,1,7,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,4,4,4,1,4,4,
+                1,7,1,1,7,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,4,4,4,4,4,4,
                 1,7,1,1,7,1,1,7,7,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,
                 1,7,7,7,7,1,1,7,7,7,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,
                 1,7,1,1,7,1,7,1,1,1,7,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,
@@ -241,10 +249,26 @@ namespace Player_Test
                 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
                 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,
                 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,
+                1,7,1,1,7,1,7,1,1,1,7,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,
+                1,7,1,1,7,1,7,1,1,1,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,
+                1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,
+                1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,4,4,
+                1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,1,
+                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,
             };
             //createLevel(level1, Size.Width / level1[0]);
             //createLevel(level2, Size.Width / level2[0]);
             createLevel(level3, Size.Width / level3[0], Size.Width/2,Size.Height/2);
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pastPlayerTimer_Tick(object sender, EventArgs e)
+        {
+            pastPlayerY = player1.Y;
         }
     }
 }
