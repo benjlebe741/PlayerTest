@@ -23,7 +23,7 @@ namespace Player_Test
         Rectangle player1 = new Rectangle(10, 170, 27, 27);
         Rectangle upDownCheck = new Rectangle(10, 170, 15, 31);
         Rectangle rightLeftCheck = new Rectangle(10, 170, 31, 15);
-
+      
         int playerSpeed = 4;
         int playerSize;
 
@@ -35,10 +35,12 @@ namespace Player_Test
         int playerStartX;
         int playerStartY;
 
-        bool taken;
+        bool dontMoveUpDown;
 
-        bool bottomBorderTouching = false;
-        bool sideBorderTouching = false;
+       bool bottomBorderTouching = false;
+        bool topBorderTouching = false; 
+       bool leftBorderTouching = false;
+       bool rightBorderTouching = false;
 
         public Form1()
         {
@@ -74,8 +76,6 @@ namespace Player_Test
             playerStartX = (spawnX);
             movePlayerTo(playerStartX, playerStartY);
             playerSize = player1.Width;
-
-
         }
 
 
@@ -85,85 +85,94 @@ namespace Player_Test
             //coordinate updating
             label1.Text = $"X:{player1.X}\nY:{player1.Y}";
 
-            //series of checks to move the player
-            if (wDown == true && sDown == false && player1.Y > 0 + playerSpeed)
+            //player boarder interacts with tiles
+            for (int n = 0; n < tiles.Count; n++)
+            {
+                if (rightLeftCheck.IntersectsWith(tiles[n]) && (tilePallette[n] == 4) && (rightLeftCheck.Left + 20 > tiles[n].Right))
+                {
+                    leftBorderTouching = true;
+                }
+
+                if (upDownCheck.IntersectsWith(tiles[n]) && (tilePallette[n] == 4) && (upDownCheck.Top + 20 > tiles[n].Bottom))
+                {
+                    topBorderTouching = true;
+                }
+                
+                if (rightLeftCheck.IntersectsWith(tiles[n]) && (tilePallette[n] == 4) && (rightLeftCheck.Right - 20 < tiles[n].Left))
+                {
+                    rightBorderTouching = true;
+                }
+
+                if (upDownCheck.IntersectsWith(tiles[n]) && (tilePallette[n] == 4) && (upDownCheck.Bottom - 20 < tiles[n].Top))
+                {
+                   bottomBorderTouching = true;
+                }
+            }
+            
+            //tell me whats happening
+            label2.Text = $"{bottomBorderTouching}\n{topBorderTouching}\n{leftBorderTouching}\n{rightBorderTouching}";
+
+            //move the player first
+            if (wDown == true && sDown == false && player1.Y > 0 + playerSpeed && (topBorderTouching == false))
             {
                 player1.Y -= playerSpeed;
             }
 
-            if (sDown == true && wDown == false && player1.Y < Size.Height - playerSpeed - player1.Height)
+            if (sDown == true && wDown == false && player1.Y < Size.Height - playerSpeed - player1.Height && (bottomBorderTouching == false))
             {
                 player1.Y += playerSpeed;
             }
 
-            if (aDown == true && dDown == false && player1.X > 0 + playerSpeed)
+            if (aDown == true && dDown == false && player1.X > 0 + playerSpeed && (leftBorderTouching == false))
             {
                 player1.X -= playerSpeed;
             }
 
-            if (dDown == true && aDown == false && player1.X < Size.Width - playerSpeed - player1.Width)
+            if (dDown == true && aDown == false && player1.X < Size.Width - playerSpeed - player1.Width && (rightBorderTouching == false))
             {
                 player1.X += playerSpeed;
             }
 
-            //player boarder interacts with tiles
 
-            for (int n = 0; n < tiles.Count; n++)
-            {   if (rightLeftCheck.IntersectsWith(tiles[n]) && (tilePallette[n] == 4) && (rightLeftCheck.Right > tiles[n].Left || rightLeftCheck.Left < tiles[n].Right))
-                {
-                    sideBorderTouching = true;
-                }
-
-                if (upDownCheck.IntersectsWith(tiles[n]) && (tilePallette[n] == 4) && (rightLeftCheck.Top < tiles[n].Bottom || rightLeftCheck.Bottom > tiles[n].Top))
-                {
-                    bottomBorderTouching = true;
-                }
-            }
-            label2.Text = $"{bottomBorderTouching}\n{sideBorderTouching}";
-
-            //player interacts with tiles
+            //check if the player is currently in a boarder tile, if so, set the player outside the border tile WHEN APPROPRIATE
             for (int n = 0; n < tiles.Count; n++)
             {
                 if (player1.IntersectsWith(tiles[n]) && (tilePallette[n] == 7))
                 {
-                    movePlayerTo(playerStartX, playerStartY); 
+                    movePlayerTo(playerStartX, playerStartY);
                 }
                 if (player1.IntersectsWith(tiles[n]) && (tilePallette[n] == 4))
                 {
-                    if ((bottomBorderTouching == true) && (bottomBorderTouching == true))
-                    {
-                        taken = false;
-                    }
-                   
                     //UP AND DOWN
-                    if ((player1.Top < tiles[n].Bottom) && (player1.Bottom < tiles[n].Bottom) && (sDown == true) && (taken == false)) //Player entering from ABOVE
+                    if ((player1.Top < tiles[n].Bottom) && (player1.Bottom < tiles[n].Bottom) && (sDown == true) && (dontMoveUpDown == false)) //Player entering from ABOVE
                     {
                         player1.Y = tiles[n].Top - playerSize;
-                        taken = false;
+                        dontMoveUpDown = false;
                     }
-                    else if ((player1.Top > tiles[n].Top) && (player1.Bottom > tiles[n].Top) && (wDown == true) && (taken == false)) //Player entering from BELOW
+                    else if ((player1.Top > tiles[n].Top) && (player1.Bottom > tiles[n].Top) && (wDown == true) && (dontMoveUpDown == false)) //Player entering from BELOW
                     {
                         player1.Y = tiles[n].Bottom;
-                        taken = false;
+                        dontMoveUpDown = false;
                     }
                     //LEFT AND RIGHT
                     else if ((player1.Left < tiles[n].Left) && (dDown == true)) //Player entering from LEFT
                     {
                         player1.X = tiles[n].Left - playerSize;
-                        taken = true;
-                      }
+                        dontMoveUpDown = true;
+                    }
                     else if ((player1.Right > tiles[n].Right) && (aDown == true)) //Player entering from RIGHT
                     {
                         player1.X = tiles[n].Right;
-                        taken = true;
+                        dontMoveUpDown = true;
                     }
-                    else 
-                    { 
-                        taken = false; 
+                    else
+                    {
+                        dontMoveUpDown = false;
                     }
                 }
 
             }
+
             //keep track of player boarder
             upDownCheck.X = player1.X + 6;
             upDownCheck.Y = player1.Y - 2;
@@ -171,8 +180,10 @@ namespace Player_Test
             rightLeftCheck.X = player1.X - 2;
 
             bottomBorderTouching = false;
-            sideBorderTouching = false;
-            
+            topBorderTouching = false;
+            leftBorderTouching = false;
+            rightBorderTouching = false;
+
             //refresh and do the paint function
             Refresh();
         }
@@ -276,9 +287,9 @@ namespace Player_Test
                 1,7,1,1,7,1,1,7,7,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,
                 1,7,7,7,7,1,1,7,7,7,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,
                 1,7,1,1,7,1,7,1,1,1,7,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,
-                1,7,1,1,7,1,7,1,1,1,7,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,
+                1,7,1,1,7,1,7,1,1,1,7,1,1,1,4,4,4,4,1,1,1,1,1,1,1,1,1,4,
                 1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,4,4,
-                1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,4,4,
+                1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,1,1,1,1,1,1,1,1,4,4,
                 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
                 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,
                 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,
