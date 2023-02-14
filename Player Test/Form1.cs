@@ -21,6 +21,8 @@ namespace Player_Test
 
         SolidBrush blueBrush = new SolidBrush(Color.DodgerBlue);
         Rectangle player1 = new Rectangle(10, 170, 27, 27);
+        Rectangle upDownCheck = new Rectangle(10, 170, 15, 31);
+        Rectangle rightLeftCheck = new Rectangle(10, 170, 31, 15);
 
         int playerSpeed = 4;
         int playerSize;
@@ -33,10 +35,10 @@ namespace Player_Test
         int playerStartX;
         int playerStartY;
 
-        int pastPlayerY; 
-
         bool taken;
 
+        bool bottomBorderTouching = false;
+        bool sideBorderTouching = false;
 
         public Form1()
         {
@@ -82,11 +84,13 @@ namespace Player_Test
         {
             //coordinate updating
             label1.Text = $"X:{player1.X}\nY:{player1.Y}";
+
             //series of checks to move the player
             if (wDown == true && player1.Y > 0 + playerSpeed)
             {
                 player1.Y -= playerSpeed;
             }
+
             if (sDown == true && player1.Y < Size.Height - playerSpeed - player1.Height)
             {
                 player1.Y += playerSpeed;
@@ -96,10 +100,33 @@ namespace Player_Test
             {
                 player1.X -= playerSpeed;
             }
+
             if (dDown == true && player1.X < Size.Width - playerSpeed - player1.Width)
             {
                 player1.X += playerSpeed;
             }
+
+            //keep track of player boarder
+           upDownCheck.X= player1.X + 6;
+            upDownCheck.Y = player1.Y - 2;
+            rightLeftCheck.Y= player1.Y + 6;
+            rightLeftCheck.X = player1.X - 2;
+
+            //player boarder interacts with tiles
+
+            for (int n = 0; n < tiles.Count; n++)
+            {   if (rightLeftCheck.IntersectsWith(tiles[n]) && (tilePallette[n] == 4) && (rightLeftCheck.Right > tiles[n].Left || rightLeftCheck.Left < tiles[n].Right))
+                {
+                    sideBorderTouching = true;
+                }
+
+                if (upDownCheck.IntersectsWith(tiles[n]) && (tilePallette[n] == 4) && (rightLeftCheck.Top < tiles[n].Bottom || rightLeftCheck.Bottom > tiles[n].Top))
+                {
+                    bottomBorderTouching = true;
+                }
+            }
+            label2.Text = $"{bottomBorderTouching}\n{sideBorderTouching}";
+
             //player interacts with tiles
             for (int n = 0; n < tiles.Count; n++)
             {
@@ -109,10 +136,11 @@ namespace Player_Test
                 }
                 if (player1.IntersectsWith(tiles[n]) && (tilePallette[n] == 4))
                 {
-                    if (((pastPlayerY) - (player1.Y)) <= 4) 
+                    if ((bottomBorderTouching == true) && (bottomBorderTouching == true))
                     {
-                      //  taken = false;
+                        taken = false;
                     }
+                   
                     //UP AND DOWN
                     if ((player1.Top < tiles[n].Bottom) && (player1.Bottom < tiles[n].Bottom) && (sDown == true) && (taken == false)) //Player entering from ABOVE
                     {
@@ -142,8 +170,10 @@ namespace Player_Test
                 }
 
             }
-        //refresh and do the paint function
-        Refresh();
+            bottomBorderTouching = false;
+            sideBorderTouching = false;
+            //refresh and do the paint function
+            Refresh();
         }
 
         private void Form1_Paint(object sender, PaintEventArgs e)
@@ -165,7 +195,9 @@ namespace Player_Test
                     }
 
                 }
-                e.Graphics.FillRectangle(blueBrush, player1);
+            e.Graphics.FillRectangle(brush2, rightLeftCheck);
+            e.Graphics.FillRectangle(brush2, upDownCheck);
+            e.Graphics.FillRectangle(blueBrush, player1);
             }
 
         private void Form1_KeyUp_1(object sender, KeyEventArgs e)
@@ -268,7 +300,7 @@ namespace Player_Test
 
         private void pastPlayerTimer_Tick(object sender, EventArgs e)
         {
-            pastPlayerY = player1.Y;
+           
         }
     }
 }
