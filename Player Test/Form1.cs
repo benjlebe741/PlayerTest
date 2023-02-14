@@ -86,31 +86,25 @@ namespace Player_Test
             label1.Text = $"X:{player1.X}\nY:{player1.Y}";
 
             //series of checks to move the player
-            if (wDown == true && player1.Y > 0 + playerSpeed)
+            if (wDown == true && sDown == false && player1.Y > 0 + playerSpeed)
             {
                 player1.Y -= playerSpeed;
             }
 
-            if (sDown == true && player1.Y < Size.Height - playerSpeed - player1.Height)
+            if (sDown == true && wDown == false && player1.Y < Size.Height - playerSpeed - player1.Height)
             {
                 player1.Y += playerSpeed;
             }
 
-            if (aDown == true && player1.X > 0 + playerSpeed)
+            if (aDown == true && dDown == false && player1.X > 0 + playerSpeed)
             {
                 player1.X -= playerSpeed;
             }
 
-            if (dDown == true && player1.X < Size.Width - playerSpeed - player1.Width)
+            if (dDown == true && aDown == false && player1.X < Size.Width - playerSpeed - player1.Width)
             {
                 player1.X += playerSpeed;
             }
-
-            //keep track of player boarder
-           upDownCheck.X= player1.X + 6;
-            upDownCheck.Y = player1.Y - 2;
-            rightLeftCheck.Y= player1.Y + 6;
-            rightLeftCheck.X = player1.X - 2;
 
             //player boarder interacts with tiles
 
@@ -170,8 +164,15 @@ namespace Player_Test
                 }
 
             }
+            //keep track of player boarder
+            upDownCheck.X = player1.X + 6;
+            upDownCheck.Y = player1.Y - 2;
+            rightLeftCheck.Y = player1.Y + 6;
+            rightLeftCheck.X = player1.X - 2;
+
             bottomBorderTouching = false;
             sideBorderTouching = false;
+            
             //refresh and do the paint function
             Refresh();
         }
