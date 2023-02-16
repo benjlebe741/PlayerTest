@@ -34,7 +34,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.playLabel = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.pastPlayerTimer = new System.Windows.Forms.Timer(this.components);
+            this.label3 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // playerTimer
@@ -75,10 +75,15 @@
             this.label2.TabIndex = 2;
             this.label2.Text = "label2";
             // 
-            // pastPlayerTimer
+            // label3
             // 
-            this.pastPlayerTimer.Enabled = true;
-            this.pastPlayerTimer.Tick += new System.EventHandler(this.pastPlayerTimer_Tick);
+            this.label3.AutoSize = true;
+            this.label3.ForeColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.label3.Location = new System.Drawing.Point(202, 18);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(44, 16);
+            this.label3.TabIndex = 3;
+            this.label3.Text = "label3";
             // 
             // zeldaClone
             // 
@@ -86,6 +91,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Black;
             this.ClientSize = new System.Drawing.Size(1904, 1072);
+            this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.playLabel);
             this.Controls.Add(this.label1);
@@ -111,7 +117,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label playLabel;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Timer pastPlayerTimer;
+        private System.Windows.Forms.Label label3;
     }
 }
 
