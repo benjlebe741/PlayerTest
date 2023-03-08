@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -12,8 +13,8 @@ namespace Player_Test
 {
     public partial class zeldaClone : Form
     {
-        List<Rectangle> tiles = new List<Rectangle>();
-        List<int> tilePallette = new List<int>();
+        List<Rectangle> currentTiles = new List<Rectangle>();
+        List<int> currentTilePallette = new List<int>();
         int currentLevel;
         
         int layoutWidth = 3;
@@ -22,13 +23,18 @@ namespace Player_Test
         SolidBrush brush0 = new SolidBrush(Color.Black);
         SolidBrush brush2 = new SolidBrush(Color.FloralWhite);
         SolidBrush brush3 = new SolidBrush(Color.DodgerBlue);
+        SolidBrush brush4 = new SolidBrush(Color.Red);
 
-        Rectangle player1 = new Rectangle(10, 170, 27, 27);
-        Rectangle upDownCheck = new Rectangle(10, 170, 15, 31);
-        Rectangle rightLeftCheck = new Rectangle(10, 170, 31, 15);
-      
-        int playerSpeed = 4;
-        int playerSize;
+
+        Rectangle player1 = new Rectangle(10, 170, 1, 1);
+        Rectangle upDownCheck = new Rectangle(10, 170, 1, 31);
+        Rectangle rightLeftCheck = new Rectangle(10, 170, 31, 1);
+
+
+        int playerDirection;
+        int playerSpeed = 3;
+        int playerSight = 1350;
+        int playerSize = 27;
 
         private bool wDown;
         private bool aDown;
@@ -44,37 +50,38 @@ namespace Player_Test
        bool leftBorderTouching = false;
        bool rightBorderTouching = false;
 
+        #region ALL LEVELS:
         int[][] levels = new int[][]
                {
                 new int[]
                 {
                 30,
                 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
-                4,4,1,1,7,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,4,4,4,4,4,4,4,4,
-                4,4,1,1,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,4,
-                4,4,7,7,7,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,
-                4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,
-                4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,1,1,1,1,1,1,1,1,1,4,4,4,
-                4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,
-                4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,1,1,1,1,1,1,1,1,4,4,4,4,
-                4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,
-                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
-                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
-                4,1,1,1,7,1,7,1,1,1,7,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-                4,1,1,1,7,1,7,1,1,1,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+                4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,4,4,4,4,
+                4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,
+                4,4,1,1,4,4,4,4,4,4,4,4,4,4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,
+                4,4,1,1,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
                 4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,
-                4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,
-                4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,
+                4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,
+                4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,
+                4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,4,4,4,4,
+                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
+                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
+                4,1,1,1,1,1,1,1,1,1,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+                4,1,1,1,1,1,1,1,1,1,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+                4,4,1,1,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,4,1,1,4,4,4,
+                4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,
+                4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,
                 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
                 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
             },
                  new int[]
                 {
                 30,
-                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
-                4,4,1,1,7,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,4,4,4,4,4,4,4,4,
-                4,4,1,1,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,4,
-                4,4,7,7,7,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,
+                4,7,7,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+                7,4,1,7,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,4,4,4,4,4,4,4,4,
+                4,4,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,4,
+                7,7,7,7,7,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,
                 4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,
                 4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,1,1,1,1,1,1,1,1,1,4,4,4,
                 4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,
@@ -87,30 +94,30 @@ namespace Player_Test
                 4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,
                 4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,
                 4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,
-                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
-                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
+                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
             },
 
         new int[]
                 {
                 30,
                 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
-                4,4,1,1,7,1,1,1,1,1,1,1,1,1,4,7,1,1,1,1,1,1,4,4,4,4,4,4,4,4,
-                4,4,1,1,7,1,1,7,7,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,4,
-                4,4,7,7,7,1,1,7,7,7,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,
-                4,4,1,1,7,1,7,1,1,1,7,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,
+                4,4,1,1,7,1,1,1,1,1,1,1,1,1,4,4,1,1,1,1,1,1,4,4,4,4,4,4,4,4,
+                4,4,1,1,7,1,1,7,7,7,1,1,1,1,4,4,1,1,1,1,1,1,1,1,1,4,4,4,4,4,
+                4,4,7,7,7,1,1,7,7,7,1,1,1,1,4,4,1,1,1,1,1,1,1,1,1,1,1,4,4,4,
+                4,4,1,1,7,1,7,1,1,1,7,1,1,1,4,4,1,1,1,1,1,1,1,1,1,1,1,4,4,4,
                 4,4,1,1,7,1,7,1,1,1,7,1,1,1,4,4,4,4,1,1,1,1,1,1,1,1,1,4,4,4,
-                4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,
                 4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,1,1,1,1,1,1,1,1,4,4,4,4,
-                4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,
-                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
-                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
+                4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,1,1,1,1,1,1,1,1,4,4,4,4,
+                4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,1,1,1,1,1,1,1,1,1,1,4,4,
+                4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
+                4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
                 1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,
                 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,
                 4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,
                 4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,
                 4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,
-                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
+                4,4,4,4,4,4,4,4,4,4,1,1,1,1,1,4,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
                 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
             },
         //NEXT LAYER
@@ -139,7 +146,7 @@ namespace Player_Test
      new int[]
                 {
                 30,
-                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
                 4,4,1,1,7,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,4,4,4,4,4,4,4,4,
                 4,4,1,1,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,4,
                 4,4,7,7,7,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,
@@ -163,13 +170,13 @@ new int[]
                 30,
                 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
                 4,4,1,1,7,1,1,1,1,1,1,1,1,1,4,7,1,7,1,1,1,1,4,4,4,4,4,4,4,4,
-                4,4,1,1,7,1,1,7,7,7,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,4,
-                4,4,7,7,7,1,1,7,7,7,1,1,1,1,4,7,1,1,1,1,1,1,1,1,1,1,1,4,4,4,
-                4,4,1,1,7,1,7,1,1,1,7,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,
-                4,4,1,1,7,1,7,1,1,1,7,1,1,1,4,4,4,4,1,1,1,1,1,1,1,1,1,4,4,4,
-                4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,
-                4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,1,1,1,1,1,1,1,1,4,4,4,4,
-                4,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,
+                4,4,1,1,7,1,1,7,7,7,1,1,1,1,4,1,1,1,1,1,1,1,1,1,4,4,4,4,4,4,
+                4,4,7,7,7,1,1,7,7,7,1,1,1,1,4,7,1,1,1,1,1,1,1,1,4,1,1,4,4,4,
+                4,4,1,1,7,1,7,1,1,1,7,1,1,1,4,1,1,1,1,1,1,1,1,1,4,1,1,4,4,4,
+                4,4,1,1,7,1,7,1,1,1,7,1,1,1,4,4,4,4,1,1,1,1,1,1,4,1,1,4,4,4,
+                4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,4,1,4,4,4,4,
+                4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,4,4,4,1,1,1,1,1,1,4,1,4,4,4,4,
+                4,4,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,1,4,4,
                 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
                 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,4,4,4,4,4,4,4,4,
                 1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,
@@ -181,6 +188,7 @@ new int[]
                 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
             },
 };
+        #endregion
         public zeldaClone()
         {
             InitializeComponent();
@@ -198,8 +206,8 @@ new int[]
         //=----------------------------------------------------------
         private void createLevel(int[] level, int rectangleDimension, int offsetX, int offsetY)
         {
-            tiles.Clear();
-            tilePallette.Clear();
+            currentTiles.Clear();
+            currentTilePallette.Clear();
             int y = 1;
             for (int n = 1; n < level.Length; n++)
             {
@@ -208,8 +216,8 @@ new int[]
                 {
                     x -= level[0];
                 }
-                tiles.Add(new Rectangle(((x - 1) * rectangleDimension) + offsetX, ((y - 1) * rectangleDimension) + offsetY, rectangleDimension, rectangleDimension));
-                tilePallette.Add(level[n]);
+                currentTiles.Add(new Rectangle(((x - 1) * rectangleDimension) + offsetX, ((y - 1) * rectangleDimension) + offsetY, rectangleDimension, rectangleDimension));
+                currentTilePallette.Add(level[n]);
                 if ((n) % (level[0]) == 0)
                 {
                     y++;
@@ -217,7 +225,12 @@ new int[]
                 }
 
             }
-            playerSize = player1.Width;
+            player1.Width = playerSize;
+            player1.Height = playerSize;
+            upDownCheck.Width = playerSize;
+            upDownCheck.Height = playerSize + 4;
+            rightLeftCheck.Height = playerSize;
+            rightLeftCheck.Width = playerSize + 4;
         }
 
 
@@ -228,25 +241,25 @@ new int[]
             //coordinate updating
             label1.Text = $"X:{player1.X}\nY:{player1.Y}";
 
-            //player boarder interacts with tiles
-            for (int n = 0; n < tiles.Count; n++)
+            //player boarder interacts with currentTiles
+            for (int n = 0; n < currentTiles.Count; n++)
             {
-                if (rightLeftCheck.IntersectsWith(tiles[n]) && (tilePallette[n] == 4) && (rightLeftCheck.Left + 20 > tiles[n].Right))
+                if (rightLeftCheck.IntersectsWith(currentTiles[n]) && (currentTilePallette[n] == 4) && (rightLeftCheck.Left + 20 > currentTiles[n].Right))
                 {
                     leftBorderTouching = true;
                 }
 
-                if (upDownCheck.IntersectsWith(tiles[n]) && (tilePallette[n] == 4) && (upDownCheck.Top + 20 > tiles[n].Bottom))
+                if (upDownCheck.IntersectsWith(currentTiles[n]) && (currentTilePallette[n] == 4) && (upDownCheck.Top + 20 > currentTiles[n].Bottom))
                 {
                     topBorderTouching = true;
                 }
                 
-                if (rightLeftCheck.IntersectsWith(tiles[n]) && (tilePallette[n] == 4) && (rightLeftCheck.Right - 20 < tiles[n].Left))
+                if (rightLeftCheck.IntersectsWith(currentTiles[n]) && (currentTilePallette[n] == 4) && (rightLeftCheck.Right - 20 < currentTiles[n].Left))
                 {
                     rightBorderTouching = true;
                 }
 
-                if (upDownCheck.IntersectsWith(tiles[n]) && (tilePallette[n] == 4) && (upDownCheck.Bottom - 20 < tiles[n].Top))
+                if (upDownCheck.IntersectsWith(currentTiles[n]) && (currentTilePallette[n] == 4) && (upDownCheck.Bottom - 20 < currentTiles[n].Top))
                 {
                    bottomBorderTouching = true;
                 }
@@ -254,7 +267,7 @@ new int[]
             
             //tell me whats happening
             label2.Text = $"{bottomBorderTouching}\n{topBorderTouching}\n{leftBorderTouching}\n{rightBorderTouching}";
-            label3.Text = $"{currentLevel}";
+            label3.Text = $"{currentLevel}\n{playerDirection}";
 
             //move the player first
             if (wDown == true && sDown == false && player1.Y > 0 + playerSpeed && (topBorderTouching == false))
@@ -279,39 +292,39 @@ new int[]
 
 
             //check if the player is currently in a boarder tile, if so, set the player outside the border tile WHEN APPROPRIATE
-            for (int n = 0; n < tiles.Count; n++)
+            for (int n = 0; n < currentTiles.Count; n++)
             {
-                if (player1.IntersectsWith(tiles[n]) && (tilePallette[n] == 7))
+                if (player1.IntersectsWith(currentTiles[n]) && (currentTilePallette[n] == 7))
                 {
                     movePlayerTo(playerSpawnX, playerSpawnY);
                     createLevel(levels[playerSpawnLevel], Size.Width / levels[playerSpawnLevel][0], 14, 16);
                     currentLevel= playerSpawnLevel;
                 }
-                if (player1.IntersectsWith(tiles[n]) && (tilePallette[n] == 4))
+                if (player1.IntersectsWith(currentTiles[n]) && (currentTilePallette[n] == 4))
                 {
                     //UP AND DOWN
-                    if ((player1.Top < tiles[n].Bottom) && (player1.Bottom < tiles[n].Bottom) && (sDown == true)) //Player entering from ABOVE
+                    if ((player1.Top < currentTiles[n].Bottom) && (player1.Bottom < currentTiles[n].Bottom) && (sDown == true)) //Player entering from ABOVE
                     {
-                        player1.Y = tiles[n].Top - playerSize;
+                        player1.Y = currentTiles[n].Top - playerSize;
                     }
-                    else if ((player1.Top > tiles[n].Top) && (player1.Bottom > tiles[n].Top) && (wDown == true)) //Player entering from BELOW
+                    else if ((player1.Top > currentTiles[n].Top) && (player1.Bottom > currentTiles[n].Top) && (wDown == true)) //Player entering from BELOW
                     {
-                        player1.Y = tiles[n].Bottom;
+                        player1.Y = currentTiles[n].Bottom;
                     }
                     //LEFT AND RIGHT
-                    else if ((player1.Left < tiles[n].Left) && (dDown == true)) //Player entering from LEFT
+                    else if ((player1.Left < currentTiles[n].Left) && (dDown == true)) //Player entering from LEFT
                     {
-                        player1.X = tiles[n].Left - playerSize;
+                        player1.X = currentTiles[n].Left - playerSize;
                     }
-                    else if ((player1.Right > tiles[n].Right) && (aDown == true)) //Player entering from RIGHT
+                    else if ((player1.Right > currentTiles[n].Right) && (aDown == true)) //Player entering from RIGHT
                     {
-                        player1.X = tiles[n].Right;
+                        player1.X = currentTiles[n].Right;
                     }
                 }
 
             }
 
-            //is player at the edge of the world? move to next level NOT WORKING. FIX FIX FIX
+            //is player at the edge of the world? move to next level 
             switch (player1.Y) 
             {
                 case var _ when(player1.Y <= 15): //player goes up a level 
@@ -341,10 +354,10 @@ new int[]
             }
 
             //keep track of player boarder
-            upDownCheck.X = player1.X + 6;
-            upDownCheck.Y = player1.Y - 2;
-            rightLeftCheck.Y = player1.Y + 6;
-            rightLeftCheck.X = player1.X - 2;
+            upDownCheck.X = player1.X + (player1.Width/2) - (upDownCheck.Width/2);
+            upDownCheck.Y = player1.Y + (player1.Height / 2) - (upDownCheck.Height / 2);
+            rightLeftCheck.Y = player1.Y + (player1.Height / 2) - (rightLeftCheck.Height / 2);
+            rightLeftCheck.X = player1.X + (player1.Width / 2) - (rightLeftCheck.Width / 2);
 
             bottomBorderTouching = false;
             topBorderTouching = false;
@@ -357,30 +370,39 @@ new int[]
 
 
         //=----------------------------------------------------------------------------------------------
-        //PAINT: paint the tiles, then player!
+        //PAINT: paint the currentTiles, then player!
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
-            
-                for (int n = 0; n < tiles.Count; n++)
+            bool inSight;
+
+            for (int n = 0; n < currentTiles.Count; n++)
+            {
+                //is the tile in sight of player?
+                if (currentTiles[n].Left < player1.X - playerSize - playerSight || currentTiles[n].Left > player1.X + playerSight || currentTiles[n].Top < player1.Y - playerSize - playerSight || currentTiles[n].Top > player1.Y + playerSight)
+                { inSight = false; }
+                else
+                { inSight = true; }
+                //what tile is it?
+                if (currentTilePallette[n] == 4 && inSight == true)
                 {
-                if (tilePallette[n] == 4) { 
-                    e.Graphics.FillRectangle(brush1, tiles[n]);              
+                    e.Graphics.FillRectangle(brush1, currentTiles[n]);
                 }
-                    if (tilePallette[n] == 7)
-                    {
-                        e.Graphics.FillRectangle(brush2, tiles[n]);
-                    }
-                    if (tilePallette[n] == 1)
-                    {
-                        e.Graphics.FillRectangle(brush0, tiles[n]);
-
-                    }
+                if (currentTilePallette[n] == 7 && inSight == true)
+                {
+                    e.Graphics.FillRectangle(brush2, currentTiles[n]);
+                }
+                if (currentTilePallette[n] == 1)
+                {
+                    e.Graphics.FillRectangle(brush0, currentTiles[n]);
 
                 }
+
+            }
+            //show player and player boarders
             e.Graphics.FillRectangle(brush2, rightLeftCheck);
             e.Graphics.FillRectangle(brush2, upDownCheck);
             e.Graphics.FillRectangle(brush3, player1);
-            }
+        }
 
 
         //=----------------------------------------------------------------------------------------------
@@ -401,7 +423,7 @@ new int[]
                     dDown = false;
                     break;
                 case Keys.Space:
-                    playerSpeed = 4;
+                    playerSpeed = 3;
                     break;
             }
         }
@@ -413,15 +435,19 @@ new int[]
             {
                 case Keys.W:
                     wDown = true;
+                    playerDirection = 1;
                     break;
                 case Keys.A:
                     aDown = true;
+                    playerDirection = 4;
                     break;
                 case Keys.S:
                     sDown = true;
+                    playerDirection = 3;
                     break;
                 case Keys.D:
                     dDown = true;
+                    playerDirection = 2;
                     break;
                 case Keys.Space:
                     playerSpeed = 8;
