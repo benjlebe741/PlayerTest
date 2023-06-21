@@ -13,43 +13,53 @@ namespace Player_Test
 {
     public partial class zeldaClone : Form
     {
+        #region Global Variables
+        //Lists to store the current loaded tiles, and current tiles Colour Pallette:
         List<Rectangle> currentTiles = new List<Rectangle>();
         List<int> currentTilePallette = new List<int>();
+        
+        //storing current Level
         int currentLevel;
         
+        //WHAT DOES THIS DO??
         int layoutWidth = 3;
 
+        //Paint Brushes
         SolidBrush brush1 = new SolidBrush(Color.DarkSlateGray);
         SolidBrush brush0 = new SolidBrush(Color.Black);
         SolidBrush brush2 = new SolidBrush(Color.FloralWhite);
         SolidBrush brush3 = new SolidBrush(Color.DodgerBlue);
         SolidBrush brush4 = new SolidBrush(Color.Red);
 
-
+        //Entities
         Rectangle player1 = new Rectangle(10, 170, 1, 1);
         Rectangle upDownCheck = new Rectangle(10, 170, 1, 31);
         Rectangle rightLeftCheck = new Rectangle(10, 170, 31, 1);
 
-
+        //Player Values
         int playerDirection;
         int playerSpeed = 3;
         int playerSight = 1350;
         int playerSize = 27;
 
+        //Key Down Values
         private bool wDown;
         private bool aDown;
         private bool sDown;
         private bool dDown;
 
+        //Player Current Spawn
         int playerSpawnX = 580;
         int playerSpawnY = 326;
         int playerSpawnLevel = 0;
 
+        //Is Player Touching Values
        bool bottomBorderTouching = false;
         bool topBorderTouching = false; 
        bool leftBorderTouching = false;
        bool rightBorderTouching = false;
-
+        #endregion
+       
         #region ALL LEVELS:
         int[][] levels = new int[][]
                {
@@ -189,21 +199,23 @@ new int[]
             },
 };
         #endregion
+
+        #region Initialize
         public zeldaClone()
         {
             InitializeComponent();
         }
+        #endregion
 
-        //=----------------------------------------------------------
-        
-        //=----------------------------------------------------------
+        #region Move Player To
         private void movePlayerTo(int x, int y)
         {
             player1.X = x;
             player1.Y = y;
         }
+        #endregion
 
-        //=----------------------------------------------------------
+        #region Create Level
         private void createLevel(int[] level, int rectangleDimension, int offsetX, int offsetY)
         {
             currentTiles.Clear();
@@ -232,10 +244,9 @@ new int[]
             rightLeftCheck.Height = playerSize;
             rightLeftCheck.Width = playerSize + 4;
         }
+        #endregion
 
-
-        //=----------------------------------------------------------------------------------------------
-        //WHILE LOOP
+        #region Player Timer
         private void playerTimer_Tick(object sender, EventArgs e)
         {
             //coordinate updating
@@ -307,16 +318,16 @@ new int[]
                     {
                         player1.Y = currentTiles[n].Top - playerSize;
                     }
-                    else if ((player1.Top > currentTiles[n].Top) && (player1.Bottom > currentTiles[n].Top) && (wDown == true)) //Player entering from BELOW
+                    if ((player1.Top > currentTiles[n].Top) && (player1.Bottom > currentTiles[n].Top) && (wDown == true)) //Player entering from BELOW
                     {
                         player1.Y = currentTiles[n].Bottom;
                     }
                     //LEFT AND RIGHT
-                    else if ((player1.Left < currentTiles[n].Left) && (dDown == true)) //Player entering from LEFT
+                    if ((player1.Left < currentTiles[n].Left) && (dDown == true)) //Player entering from LEFT
                     {
                         player1.X = currentTiles[n].Left - playerSize;
                     }
-                    else if ((player1.Right > currentTiles[n].Right) && (aDown == true)) //Player entering from RIGHT
+                    if ((player1.Right > currentTiles[n].Right) && (aDown == true)) //Player entering from RIGHT
                     {
                         player1.X = currentTiles[n].Right;
                     }
@@ -367,9 +378,9 @@ new int[]
             //refresh and do the paint function
             Refresh();
         }
+        #endregion
 
-
-        //=----------------------------------------------------------------------------------------------
+        #region Paint
         //PAINT: paint the currentTiles, then player!
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
@@ -403,9 +414,9 @@ new int[]
             e.Graphics.FillRectangle(brush2, upDownCheck);
             e.Graphics.FillRectangle(brush3, player1);
         }
+        #endregion
 
-
-        //=----------------------------------------------------------------------------------------------
+        #region Check Keys
         private void Form1_KeyUp_1(object sender, KeyEventArgs e)
         {
             switch (e.KeyCode)
@@ -454,18 +465,19 @@ new int[]
                     break;
             }
         }
+        #endregion
 
-
-        //=----------------------------------------------------------------------------------------------
+        #region Start Button
         private void playLabel_Click(object sender, EventArgs e)
         {
             playerTimer.Enabled = true;
             playLabel.Visible = false;
 
-            createLevel(levels[0], Size.Width / levels[0][0],14, 16);
-            currentLevel= 0;
+            createLevel(levels[0], Size.Width / levels[0][0], 14, 16);
+            currentLevel = 0;
             movePlayerTo(580, 326);
         }
+        #endregion
 
         private void Form1_Load(object sender, EventArgs e)
         {
